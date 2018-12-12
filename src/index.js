@@ -8,7 +8,7 @@ class Circle extends React.Component {
   render() {
     return (
       <div className="circle tooltip" style={{height: this.props.diameter, width: this.props.diameter, background: this.props.color, border: "1px solid " + this.props.borderColor}}>
-        <span className="tooltiptext">{this.props.text}</span>
+        <span className="tooltiptext">{this.props.text}<br/>{this.props.infoString}</span>
       </div>
     );
   }
@@ -118,28 +118,28 @@ class App extends React.Component {
       displayFilter: 0,
     };
     // get building usage data
-    axios.get("http://yenergi-app-heroku.herokuapp.com/energyovertime")
+    axios.get("https://yenergi-app-heroku.herokuapp.com/energyovertime")
       .then(res => {
         this.setState({
           buildings: res.data,
         });
       });
     // get weather data
-    axios.get("http://yenergi-app-heroku.herokuapp.com/weather")
+    axios.get("https://yenergi-app-heroku.herokuapp.com/weather")
       .then(res => {
         this.setState({
           temps: res.data,
         });
       });
     // get energy for only residential colleges
-    axios.get("http://yenergi-app-heroku.herokuapp.com/rcenergy")
+    axios.get("https://yenergi-app-heroku.herokuapp.com/rcenergy")
       .then(res => {
         this.setState({
           colleges: res.data,
         });
       });
     // get number of students in each res college
-    axios.get("http://yenergi-app-heroku.herokuapp.com/students")
+    axios.get("https://yenergi-app-heroku.herokuapp.com/students")
       .then(res => {
         this.setState({
           students: res.data,
@@ -183,13 +183,13 @@ class App extends React.Component {
     if (this.state.displayFilter === 2) {    // get just student counts
       return this.state.students.map((bldg) => {
         return (
-            <Circle key={parseInt(bldg.id)} lat={bldg.lat} lng={bldg.lng} text={bldg.description} diameter={bldg.count * (0.001 / (this.state.nlat - this.state.slat))} color={"rgba(0, 255, 0, 0.25)"} borderColor={"green"} />
+            <Circle key={parseInt(bldg.id)} lat={bldg.lat} lng={bldg.lng} text={bldg.description} infoString={Math.round(bldg.count * 100)/100 + " students"} diameter={bldg.count * (0.001 / (this.state.nlat - this.state.slat))} color={"rgba(0, 255, 0, 0.25)"} borderColor={"green"} innerText={bldg.count} />
           );
       });
     } else if (this.state.displayFilter === 1) {   // get only college data
       return this.state.colleges.map((bldg) => {
         return (
-            <Circle key={bldg.id} lat={bldg.lat} lng={bldg.lng} text={bldg.description} diameter={this.normalize(bldg.usage[this.state.index])} color={"rgba(0, 0, 255, 0.25)"} borderColor={"blue"} />
+            <Circle key={bldg.id} lat={bldg.lat} lng={bldg.lng} text={bldg.description} infoString={Math.round(bldg.usage[this.state.index] * 100)/100 + " kWh"} diameter={this.normalize(bldg.usage[this.state.index])} color={"rgba(0, 0, 255, 0.25)"} borderColor={"blue"} />
           );
       });
     } else {    // get all buildings
@@ -199,7 +199,7 @@ class App extends React.Component {
 
       return buildings.map((bldg) => {
         return (
-            <Circle key={bldg.id} lat={bldg.lat} lng={bldg.lng} text={bldg.description} diameter={this.normalize(bldg.usage[this.state.index])} color={"rgba(255, 0, 0, 0.25)"} borderColor={"red"} />
+            <Circle key={bldg.id} lat={bldg.lat} lng={bldg.lng} text={bldg.description} infoString={Math.round(bldg.usage[this.state.index] * 100)/100 + " kWh"} diameter={this.normalize(bldg.usage[this.state.index])} color={"rgba(255, 0, 0, 0.25)"} borderColor={"red"} />
           );
       });
     }
