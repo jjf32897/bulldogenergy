@@ -118,28 +118,28 @@ class App extends React.Component {
       displayFilter: 0,
     };
     // get building usage data
-    axios.get("http://127.0.0.1:5000/energyovertime")
+    axios.get("http://yenergi-app-heroku.herokuapp.com/energyovertime")
       .then(res => {
         this.setState({
           buildings: res.data,
         });
       });
     // get weather data
-    axios.get("http://127.0.0.1:5000/weather")
+    axios.get("http://yenergi-app-heroku.herokuapp.com/weather")
       .then(res => {
         this.setState({
           temps: res.data,
         });
       });
     // get energy for only residential colleges
-    axios.get("http://127.0.0.1:5000/rcenergy")
+    axios.get("http://yenergi-app-heroku.herokuapp.com/rcenergy")
       .then(res => {
         this.setState({
           colleges: res.data,
         });
       });
     // get number of students in each res college
-    axios.get("http://127.0.0.1:5000/students")
+    axios.get("http://yenergi-app-heroku.herokuapp.com/students")
       .then(res => {
         this.setState({
           students: res.data,
