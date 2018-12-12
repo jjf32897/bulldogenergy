@@ -39,7 +39,7 @@ class Form extends React.Component {
       <div className="options">
         <h1>Yenergi</h1>
         <div>
-          Explore energy consumption across Yale University. Use the following filters to visualize data across many different dimensions.
+          Explore energy consumption at Yale University. Use the following filters to visualize data across many different dimensions.
         </div>
         <h3>Options:</h3>
         <div className="date">
@@ -160,7 +160,7 @@ class App extends React.Component {
   }
 
   getTemp() {
-    if (this.state.temps.length > 0) {
+    if (this.state.temps.length > 0 && this.state.temps[this.state.index]) {
       return this.state.temps[this.state.index];
     }
     return "Unavailable";
