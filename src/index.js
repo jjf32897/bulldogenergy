@@ -37,7 +37,7 @@ class Form extends React.Component {
   render() {
     return (
       <div className="options">
-        <h1>Yenergi</h1>
+        <h1>Bulldog Energy</h1>
         <div>
           Explore energy consumption at Yale University. Use the following filters to visualize data across many different dimensions.
         </div>
@@ -60,19 +60,19 @@ class Form extends React.Component {
         </div>
         <div className="cap">
           <div><b>Max energy usage to display:</b></div>
-          <input type="radio" name="energy-cap" value={100000} checked={this.props.cap === 100000} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} />100,000<br/>
-          <input type="radio" name="energy-cap" value={10000} checked={this.props.cap === 10000} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} />10,000<br/>
-          <input type="radio" name="energy-cap" value={1000} checked={this.props.cap === 1000} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} />1,000<br/>
-          <input type="radio" name="energy-cap" value={100} checked={this.props.cap === 100} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} />100<br/>
-          <input type="radio" name="energy-cap" value={10} checked={this.props.cap === 10} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} />10<br/>
-          <input type="radio" name="energy-cap" value={99999999} checked={this.props.cap === 99999999} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} />No cap
+          <input type="radio" name="energy-cap" value={100000} checked={this.props.cap === 100000} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} /> 100,000<br/>
+          <input type="radio" name="energy-cap" value={10000} checked={this.props.cap === 10000} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} /> 10,000<br/>
+          <input type="radio" name="energy-cap" value={1000} checked={this.props.cap === 1000} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} /> 1,000<br/>
+          <input type="radio" name="energy-cap" value={100} checked={this.props.cap === 100} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} /> 100<br/>
+          <input type="radio" name="energy-cap" value={10} checked={this.props.cap === 10} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} /> 10<br/>
+          <input type="radio" name="energy-cap" value={99999999} checked={this.props.cap === 99999999} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} /> No cap
         </div><br/>
         <div className="studets-or-energy">
           <div><b>Filter buildings:</b></div>
-          <input type="radio" name="display-filter" value={0} checked={this.props.displayFilter === 0} onChange={this.handleFilterChange} />All buildings<br/>
-          <input type="radio" name="display-filter" value={1} checked={this.props.displayFilter === 1} onChange={this.handleFilterChange} />Only colleges<br/><br/>
+          <input type="radio" name="display-filter" value={0} checked={this.props.displayFilter === 0} onChange={this.handleFilterChange} /> All buildings<br/>
+          <input type="radio" name="display-filter" value={1} checked={this.props.displayFilter === 1} onChange={this.handleFilterChange} /> Only colleges<br/><br/>
           <div><b>Display number of students per dormitory:</b></div>
-          <input type="radio" name="display-filter" value={2} checked={this.props.displayFilter === 2} onChange={this.handleFilterChange} />Students (Fall 2018)<br/>
+          <input type="radio" name="display-filter" value={2} checked={this.props.displayFilter === 2} onChange={this.handleFilterChange} /> Students (Fall 2018)<br/>
         </div><br/>
       </div>
     );
@@ -182,30 +182,56 @@ class App extends React.Component {
     };
   }
 
+  // the RGB string R,G,B
+  getColor() {
+    var ret = "255,0,0";
+    if (this.state.temps.length > 0 && this.state.temps[this.state.index]) {
+      const curr_temp = this.state.temps[this.state.index];
+      if (curr_temp < 30) {
+        ret = "0,0,255";
+      } else if (curr_temp < 40) {
+        ret = "42,0,212";
+      } else if (curr_temp < 50) {
+        ret = "85,0,170";
+      } else if (curr_temp < 60) {
+        ret = "127,0,127";
+      } else if (curr_temp < 70) {
+        ret = "170,0,85";
+      } else if (curr_temp < 80) {
+        ret = "212,0,42";
+      } else {
+        ret = "255,0,0";
+      }
+    }
+    return ret;
+  }
+
   // returns the circles for this specific date
   getUsage() {
     if (this.state.displayFilter === 2) {    // get just student counts
       return this.state.students.map((bldg) => {
         return (
-            <Circle key={parseInt(bldg.id)} lat={bldg.lat} lng={bldg.lng} text={bldg.description} infoString={Math.round(bldg.count * 100)/100 + " students"} diameter={bldg.count * (0.001 / (this.state.nlat - this.state.slat))} color={"rgba(0, 255, 0, 0.25)"} borderColor={"green"} innerText={bldg.count} />
+            <Circle key={parseInt(bldg.id)} lat={bldg.lat} lng={bldg.lng} text={bldg.description} infoString={Math.round(bldg.count * 100)/100 + " students"} diameter={bldg.count * (0.001 / (this.state.nlat - this.state.slat))} color={"rgba(0, 255, 0, 0.15)"} borderColor={"green"} innerText={bldg.count} />
           );
       });
     } else if (this.state.displayFilter === 1) {   // get only college data
       const colleges = this.state.colleges.filter((bldg) => {
           return bldg.usage[this.state.index] < this.state.cap;
         });
+      const color = this.getColor();
       return colleges.map((bldg) => {
         return (
-            <Circle key={bldg.id} lat={bldg.lat} lng={bldg.lng} text={bldg.description} infoString={Math.round(bldg.usage[this.state.index] * 100)/100 + " kWh"} diameter={this.normalize(bldg.usage[this.state.index])} color={"rgba(0, 0, 255, 0.25)"} borderColor={"blue"} />
+            <Circle key={bldg.id} lat={bldg.lat} lng={bldg.lng} text={bldg.description} infoString={Math.round(bldg.usage[this.state.index] * 100)/100 + " kWh"} diameter={this.normalize(bldg.usage[this.state.index])} color={"rgba(" + color + ", 0.15)"} borderColor={"rgb(" + this.getColor() + ")"} />
           );
       });
     } else {    // get all buildings
       const buildings = this.state.buildings.filter((bldg) => {
           return bldg.usage[this.state.index] < this.state.cap;
         });
+      const color = this.getColor();
       return buildings.map((bldg) => {
         return (
-            <Circle key={bldg.id} lat={bldg.lat} lng={bldg.lng} text={bldg.description} infoString={Math.round(bldg.usage[this.state.index] * 100)/100 + " kWh"} diameter={this.normalize(bldg.usage[this.state.index])} color={"rgba(255, 0, 0, 0.25)"} borderColor={"red"} />
+            <Circle key={bldg.id} lat={bldg.lat} lng={bldg.lng} text={bldg.description} infoString={Math.round(bldg.usage[this.state.index] * 100)/100 + " kWh"} diameter={this.normalize(bldg.usage[this.state.index])} color={"rgba(" + color + ", 0.15)"} borderColor={"rgb(" + this.getColor() + ")"} />
           );
       });
     }
