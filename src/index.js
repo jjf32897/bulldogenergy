@@ -53,10 +53,13 @@ class Form extends React.Component {
           </datalist>
         </div>
         <div className="temp">
-          Avg. temp (F): {this.props.temp}
+          Avg. temp (&deg;F): {this.props.temp}
+        </div>
+        <div>
+          <h3>Total {(this.props.displayFilter === 2 && "students") || "energy usage"}: {this.props.total} {this.props.displayFilter !== 2 && "kWh"}</h3>
         </div>
         <div className="cap">
-          <div>Max energy usage to display:</div>
+          <div><b>Max energy usage to display:</b></div>
           <input type="radio" name="energy-cap" value={100000} checked={this.props.cap === 100000} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} />100,000<br/>
           <input type="radio" name="energy-cap" value={10000} checked={this.props.cap === 10000} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} />10,000<br/>
           <input type="radio" name="energy-cap" value={1000} checked={this.props.cap === 1000} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} />1,000<br/>
@@ -65,11 +68,12 @@ class Form extends React.Component {
           <input type="radio" name="energy-cap" value={99999999} checked={this.props.cap === 99999999} onChange={this.handleCapChange} disabled={this.props.displayFilter === 2} />No cap
         </div><br/>
         <div className="studets-or-energy">
+          <div><b>Filter buildings:</b></div>
           <input type="radio" name="display-filter" value={0} checked={this.props.displayFilter === 0} onChange={this.handleFilterChange} />All buildings<br/>
           <input type="radio" name="display-filter" value={1} checked={this.props.displayFilter === 1} onChange={this.handleFilterChange} />Only colleges<br/><br/>
-          <div>Display number of students per dormitory:</div>
-          <input type="radio" name="display-filter" value={2} checked={this.props.displayFilter === 2} onChange={this.handleFilterChange} />Students<br/>
-        </div>
+          <div><b>Display number of students per dormitory:</b></div>
+          <input type="radio" name="display-filter" value={2} checked={this.props.displayFilter === 2} onChange={this.handleFilterChange} />Students (Fall 2018)<br/>
+        </div><br/>
       </div>
     );
   }
@@ -187,7 +191,10 @@ class App extends React.Component {
           );
       });
     } else if (this.state.displayFilter === 1) {   // get only college data
-      return this.state.colleges.map((bldg) => {
+      const colleges = this.state.colleges.filter((bldg) => {
+          return bldg.usage[this.state.index] < this.state.cap;
+        });
+      return colleges.map((bldg) => {
         return (
             <Circle key={bldg.id} lat={bldg.lat} lng={bldg.lng} text={bldg.description} infoString={Math.round(bldg.usage[this.state.index] * 100)/100 + " kWh"} diameter={this.normalize(bldg.usage[this.state.index])} color={"rgba(0, 0, 255, 0.25)"} borderColor={"blue"} />
           );
@@ -196,13 +203,37 @@ class App extends React.Component {
       const buildings = this.state.buildings.filter((bldg) => {
           return bldg.usage[this.state.index] < this.state.cap;
         });
-
       return buildings.map((bldg) => {
         return (
             <Circle key={bldg.id} lat={bldg.lat} lng={bldg.lng} text={bldg.description} infoString={Math.round(bldg.usage[this.state.index] * 100)/100 + " kWh"} diameter={this.normalize(bldg.usage[this.state.index])} color={"rgba(255, 0, 0, 0.25)"} borderColor={"red"} />
           );
       });
     }
+  }
+
+  // compute total usage/students and return
+  getTotal() {
+    var total = 0;
+    if (this.state.displayFilter === 2) {
+      for (let i = 0; i < this.state.students.length; i++) {
+        total += this.state.students[i].count;
+      }
+    } else if (this.state.displayFilter === 1) {
+      const colleges = this.state.colleges.filter((bldg) => {
+          return bldg.usage[this.state.index] < this.state.cap;
+        });
+      for (let i = 0; i < colleges.length; i++) {
+        total += colleges[i].usage[this.state.index];
+      }
+    } else {
+      const buildings = this.state.buildings.filter((bldg) => {
+          return bldg.usage[this.state.index] < this.state.cap;
+        });
+      for (let i = 0; i < buildings.length; i++) {
+        total += buildings[i].usage[this.state.index];
+      }
+    }
+    return Math.round(total * 1000)/1000;
   }
 
   // handles date change from form
@@ -244,7 +275,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="container">
-        <Form onDateChange={this.handleDateChange} onCapChange={this.handleCapChange} onFilterChange={this.handleFilterChange} cap={this.state.cap} currDate={this.getDate()} temp={this.getTemp()} displayFilter={this.state.displayFilter} />
+        <Form onDateChange={this.handleDateChange} onCapChange={this.handleCapChange} onFilterChange={this.handleFilterChange} cap={this.state.cap} currDate={this.getDate()} temp={this.getTemp()} displayFilter={this.state.displayFilter} total={this.getTotal()} />
         <div className="map">
           <Map center={this.props.center} zoom={this.props.zoom} circles={this.getUsage()} onChange={this.handleZoomChange}/>
         </div>
